@@ -1377,7 +1377,7 @@ public interface EngytitaInterface {
     /**
      * Revoke a peer (deletes their IRK and pairwise root locally).
      *
-     * Revocation is asymmetric — see core docs / spec §6.4.
+     * Revocation is asymmetric - see core docs / spec §6.4.
      */
     fun `revoke`(`peerId`: PeerId)
     
@@ -1594,7 +1594,7 @@ open class Engytita: Disposable, AutoCloseable, EngytitaInterface {
     /**
      * Revoke a peer (deletes their IRK and pairwise root locally).
      *
-     * Revocation is asymmetric — see core docs / spec §6.4.
+     * Revocation is asymmetric - see core docs / spec §6.4.
      */
     @Throws(EngytitaException::class)override fun `revoke`(`peerId`: PeerId)
         = 
@@ -2110,7 +2110,7 @@ public object FfiConverterTypePeerId: FfiConverterRustBuffer<PeerId> {
 
 
 /**
- * Session keys for handoff — the only secret material exported by this crate.
+ * Session keys for handoff - the only secret material exported by this crate.
  *
  * `Debug` redacts key bytes; do not log the fields themselves.
  */

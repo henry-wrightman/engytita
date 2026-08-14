@@ -13,7 +13,7 @@
 //! BLE random private address (**MAC**) rotation **MUST** be aligned to EID
 //! rotation (each Engytita epoch, or more frequently). If the MAC stays stable
 //! across EID changes, the MAC becomes a stable tracking identifier and the
-//! entire unlinkability construction is defeated — regardless of IRK secrecy.
+//! entire unlinkability construction is defeated - regardless of IRK secrecy.
 //! See `spec/engytita-v1.md` §8.1.
 //!
 //! # On-air layout (legacy advertising data)
@@ -38,7 +38,7 @@ pub const LEGACY_ADV_DATA_MAX: usize = 31;
 /// AD Type: Flags.
 pub const AD_TYPE_FLAGS: u8 = 0x01;
 
-/// AD Type: Service Data — 16-bit UUID.
+/// AD Type: Service Data - 16-bit UUID.
 pub const AD_TYPE_SERVICE_DATA_16: u8 = 0x16;
 
 /// Provisional 16-bit service UUID for Engytita v1 beacons (`0xE671` LE on the wire).

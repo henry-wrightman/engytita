@@ -7,7 +7,7 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// Long-term identity for this device.
 ///
-/// Constructed only from caller-injected entropy — this type never reads an
+/// Constructed only from caller-injected entropy - this type never reads an
 /// RNG or clock.
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct Identity {
@@ -18,8 +18,8 @@ pub struct Identity {
 impl Identity {
     /// Build an identity from caller-supplied key material.
     ///
-    /// * `static_secret` — 32-byte X25519 seed (clamped by `x25519-dalek`)
-    /// * `irk` — 32-byte Identity Resolving Key
+    /// * `static_secret` - 32-byte X25519 seed (clamped by `x25519-dalek`)
+    /// * `irk` - 32-byte Identity Resolving Key
     pub fn from_parts(static_secret: [u8; 32], irk: [u8; 32]) -> Self {
         Self {
             static_secret: StaticSecret::from(static_secret),

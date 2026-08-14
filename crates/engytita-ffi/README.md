@@ -2,7 +2,7 @@
 
 UniFFI bindings for Engytita.
 
-- Opaque handles only — long-term secrets never cross the FFI boundary
+- Opaque handles only - long-term secrets never cross the FFI boundary
 - Session STS (16) and transport (32) keys are the only key bytes returned
 - Kotlin bindings: `android/library/generated/`
 - Swift bindings: `ios/Engytita/Generated/`

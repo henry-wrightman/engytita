@@ -92,7 +92,7 @@ impl Resolver {
         self.entries.reserve(cap);
 
         // HashMap is used only during rebuild for O(1) collision detection.
-        // Resolve never consults it — see [`Self::resolve`].
+        // Resolve never consults it - see [`Self::resolve`].
         let mut seen: HashMap<[u8; 8], PeerId> = HashMap::with_capacity(cap);
         for peer in peers {
             for &e in &epochs {

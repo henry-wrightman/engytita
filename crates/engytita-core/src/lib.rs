@@ -2,7 +2,7 @@
 //!
 //! `no_std`, zero I/O, fully deterministic. Epoch and entropy are always
 //! supplied by the caller. Cryptographic primitives are composed from
-//! vetted crates — never reimplemented here.
+//! vetted crates - never reimplemented here.
 //!
 //! This crate establishes *who* a nearby peer is and whether both sides
 //! consented. It does not carry application data and does not own a radio.

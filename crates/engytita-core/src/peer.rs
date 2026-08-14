@@ -4,7 +4,7 @@ use crate::derive;
 use x25519_dalek::PublicKey;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-/// Opaque peer handle derived from a static public key — not the key itself.
+/// Opaque peer handle derived from a static public key - not the key itself.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Zeroize)]
 pub struct PeerId(pub [u8; 16]);
 
@@ -23,7 +23,7 @@ impl PeerId {
 /// Locally stored record for a paired peer.
 ///
 /// Created by the pairing handshake (or crate-internal fixtures). Long-term
-/// secrets (`peer_irk`, `pairwise_root`) are not part of the public API —
+/// secrets (`peer_irk`, `pairwise_root`) are not part of the public API -
 /// prefer consent/session APIs and the resolver rather than reading them out.
 #[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct PeerRecord {
@@ -49,7 +49,7 @@ impl PeerRecord {
     /// Assemble a peer record from pairing outputs or trusted host storage.
     ///
     /// Prefer taking the sealed record from a completed pairing session. This
-    /// constructor is for reconstituting a record the host already stored — it
+    /// constructor is for reconstituting a record the host already stored - it
     /// does not validate provenance.
     pub fn new(peer_static_public: PublicKey, peer_irk: [u8; 32], pairwise_root: [u8; 32]) -> Self {
         let peer_id = PeerId::from_static_public(&peer_static_public);

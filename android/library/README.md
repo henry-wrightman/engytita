@@ -1,6 +1,6 @@
 # Android library module
 
-**Not yet implemented — see roadmap.**
+**Not yet implemented - see roadmap.**
 
 Future home for the Android library that:
 

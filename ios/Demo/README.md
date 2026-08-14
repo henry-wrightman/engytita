@@ -1,6 +1,6 @@
 # iOS demo app
 
-**Not yet implemented — see roadmap.**
+**Not yet implemented - see roadmap.**
 
 Future sample application demonstrating Engytita pairing, beacon resolution,
 and session accept on iOS.

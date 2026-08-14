@@ -1,4 +1,4 @@
-# Engytita Protocol Specification — Version 1
+# Engytita Protocol Specification - Version 1
 
 **Status:** Normative  
 **Protocol label:** `v1`  
@@ -41,7 +41,7 @@ Engytita does **not** define:
 - Ranging setup, distance/bearing computation, or FiRa MAC/PHY procedures.
 - Application transport, codecs, media, or spatial audio.
 - Accounts, servers, cloud sync, or contact-book identifiers (phone numbers, emails, handles).
-- A wall clock or CSPRNG inside the protocol logic — epoch and entropy are always caller-supplied.
+- A wall clock or CSPRNG inside the protocol logic - epoch and entropy are always caller-supplied.
 
 Implementations of the core protocol logic MUST be fully deterministic given
 identical inputs (keys, epochs, nonces, handshake bytes, entropy).
@@ -64,7 +64,7 @@ identical inputs (keys, epochs, nonces, handshake bytes, entropy).
 | **Passive eavesdropper** | Observes BLE advertisements / handshake ciphertext on the wire | MUST NOT learn stable identifiers from EIDs alone; MUST NOT recover IRKs or pairwise roots from ciphertext |
 | **Active MITM** | Relays or modifies pairing messages between two honest parties | MUST be detectable via mandatory SAS mismatch; MUST NOT complete pairing without both users confirming identical digits |
 | **Tracker** | Collects beacons over time, possibly correlating with MAC addresses | MUST NOT link EIDs across epochs without the IRK; defeated if MAC rotation is not aligned (see §8) |
-| **Revoked contact** | Previously paired; retains a copy of the victim's IRK until the victim rotates | After local `revoke`, MUST NOT resolve the revoked peer's beacons; the reverse direction is limited — see §6.4 |
+| **Revoked contact** | Previously paired; retains a copy of the victim's IRK until the victim rotates | After local `revoke`, MUST NOT resolve the revoked peer's beacons; the reverse direction is limited - see §6.4 |
 
 ### 2.3 Out of scope for this threat model
 
@@ -217,11 +217,11 @@ to trivial brute-force; Engytita authenticates cryptographic keys only.
 The handshake is a state machine. The implementation MUST expose states
 equivalent to:
 
-- `AwaitingMessage` — need inbound ciphertext
-- `SendMessage(bytes)` — outbound ciphertext to transmit
-- `ConfirmSas { digits }` — wait for out-of-band user confirmation of these digits
-- `Complete { peer_id }` — success; sealed `PeerRecord` is taken via a dedicated API
-- `Failed(error)` — terminal failure
+- `AwaitingMessage` - need inbound ciphertext
+- `SendMessage(bytes)` - outbound ciphertext to transmit
+- `ConfirmSas { digits }` - wait for out-of-band user confirmation of these digits
+- `Complete { peer_id }` - success; sealed `PeerRecord` is taken via a dedicated API
+- `Failed(error)` - terminal failure
 
 The core MUST NOT open sockets, radios, or files.
 
@@ -278,9 +278,9 @@ per-session acceptance under the local availability policy.
 
 Local availability MUST be one of:
 
-- `Off` — resolution MAY still run locally; session request and accept MUST be refused.
-- `ContactsOnly` — any paired contact MAY request/accept subject to session state rules.
-- `Allowlist(peers)` — only listed `PeerId`s MAY request/accept.
+- `Off` - resolution MAY still run locally; session request and accept MUST be refused.
+- `ContactsOnly` - any paired contact MAY request/accept subject to session state rules.
+- `Allowlist(peers)` - only listed `PeerId`s MAY request/accept.
 
 ### 6.3 Session states
 
@@ -302,7 +302,7 @@ transport_key(pairwise_root, nonce)
 IRK and pairwise root from the local contact book. Subsequent resolution of
 that peer's beacons MUST fail. Session requests involving that peer MUST fail.
 
-#### Limitation — revocation is asymmetric
+#### Limitation - revocation is asymmetric
 
 **Revocation is asymmetric.** Deleting a peer's material from *your* device
 stops *you* from resolving *them*. The revoked peer **retains a copy of your

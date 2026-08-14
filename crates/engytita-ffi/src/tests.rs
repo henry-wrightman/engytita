@@ -82,7 +82,7 @@ fn ffi_protocol_surface_round_trip() {
     let (bob_id, _alice_id) = drive_pair(alice.clone(), bob.clone());
 
     // Resolve bob's beacon from alice's engine.
-    // We don't have bob's IRK at FFI — resolution uses stored peer record from pairing.
+    // We don't have bob's IRK at FFI - resolution uses stored peer record from pairing.
     // Produce bob's beacon via core would need IRK; instead verify session path.
 
     alice.request_session(bob_id.clone()).expect("request");

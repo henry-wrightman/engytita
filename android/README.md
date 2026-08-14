@@ -1,6 +1,6 @@
 # Android scaffolding
 
-Platform integration for Engytita on Android. **Scaffold only** — this
+Platform integration for Engytita on Android. **Scaffold only** - this
 repository does not ship an Android SDK, Gradle project, or NDK build. CI does
 not compile Kotlin or link native libraries for device targets.
 
@@ -45,7 +45,7 @@ Expected shape once the library module exists (not runnable from this repo yet):
 
 The UWB Jetpack / FiRa path leaves **out-of-band parameter exchange** to the
 application: deciding *who* the peer is and supplying provisioned STS key
-material. That OOB exchange is exactly what Engytita provides — identity,
+material. That OOB exchange is exactly what Engytita provides - identity,
 mutual consent, and the 16-byte STS key handed to ranging. Engytita does not
 own the radio or the ranging session itself.
 

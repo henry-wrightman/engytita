@@ -3,7 +3,7 @@
 //! # Boundary rules
 //!
 //! - Long-term secrets (static key, IRK, pairwise root) **never** cross this
-//!   boundary — only opaque handles.
+//!   boundary - only opaque handles.
 //! - The only key bytes returned to callers are session STS (16) and transport
 //!   (32) keys, for handoff to ranging / media stacks.
 //! - Pairing is sans-I/O: the host ships bytes returned in [`PairingEvent`].
@@ -47,7 +47,7 @@ impl TryFrom<&PeerId> for CorePeerId {
     }
 }
 
-/// Session keys for handoff — the only secret material exported by this crate.
+/// Session keys for handoff - the only secret material exported by this crate.
 ///
 /// `Debug` redacts key bytes; do not log the fields themselves.
 #[derive(Clone, uniffi::Record)]
@@ -327,7 +327,7 @@ impl Engytita {
 
     /// Revoke a peer (deletes their IRK and pairwise root locally).
     ///
-    /// Revocation is asymmetric — see core docs / spec §6.4.
+    /// Revocation is asymmetric - see core docs / spec §6.4.
     pub fn revoke(&self, peer_id: PeerId) -> Result<(), EngytitaError> {
         let id = CorePeerId::try_from(&peer_id)?;
         self.inner

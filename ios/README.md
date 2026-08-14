@@ -1,6 +1,6 @@
 # iOS scaffolding
 
-Platform integration for Engytita on iOS. **Scaffold only** — this repository
+Platform integration for Engytita on iOS. **Scaffold only** - this repository
 does not ship an Xcode project, XCFramework, or CocoaPods/SPM package that
 builds in CI.
 
@@ -38,7 +38,7 @@ Expected shape once the framework exists (not runnable from this repo yet):
    confirms SAS digits, then uses opaque peer handles for resolve / session
    APIs.
 
-## Platform limitation — ranging
+## Platform limitation - ranging
 
 Ranging keyed by Engytita is **not available** on iOS. Nearby Interaction
 manages ranging security internally with its own discovery tokens; there is

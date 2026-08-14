@@ -2,7 +2,7 @@
 
 Encode and decode Engytita EIDs into BLE advertisement Service Data payloads.
 
-**Bytes only.** No radio, no scanning, no advertising APIs — transmission is
+**Bytes only.** No radio, no scanning, no advertising APIs - transmission is
 the platform layer's job.
 
 **MAC rotation MUST be aligned to EID rotation.** If the BLE address stays

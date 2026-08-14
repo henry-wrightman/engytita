@@ -99,7 +99,7 @@ fn malformed_advertising_data_rejected_without_panic() {
     );
     // Zero length
     assert_eq!(decode_advertising_data(&[0]), Err(BleError::BadLength));
-    // Valid flags only — no service data
+    // Valid flags only - no service data
     assert_eq!(
         decode_advertising_data(&[2, AD_TYPE_FLAGS, 0x06]),
         Err(BleError::NotFound)

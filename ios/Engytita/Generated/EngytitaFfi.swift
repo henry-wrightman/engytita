@@ -509,7 +509,7 @@ public protocol EngytitaProtocol : AnyObject {
     /**
      * Revoke a peer (deletes their IRK and pairwise root locally).
      *
-     * Revocation is asymmetric — see core docs / spec §6.4.
+     * Revocation is asymmetric - see core docs / spec §6.4.
      */
     func revoke(peerId: PeerId) throws 
     
@@ -670,7 +670,7 @@ open func resolve(beacon: Data, epoch: UInt64)throws  -> PeerId? {
     /**
      * Revoke a peer (deletes their IRK and pairwise root locally).
      *
-     * Revocation is asymmetric — see core docs / spec §6.4.
+     * Revocation is asymmetric - see core docs / spec §6.4.
      */
 open func revoke(peerId: PeerId)throws  {try rustCallWithError(FfiConverterTypeEngytitaError.lift) {
     uniffi_engytita_ffi_fn_method_engytita_revoke(self.uniffiClonePointer(),
@@ -1067,7 +1067,7 @@ public func FfiConverterTypePeerId_lower(_ value: PeerId) -> RustBuffer {
 
 
 /**
- * Session keys for handoff — the only secret material exported by this crate.
+ * Session keys for handoff - the only secret material exported by this crate.
  *
  * `Debug` redacts key bytes; do not log the fields themselves.
  */

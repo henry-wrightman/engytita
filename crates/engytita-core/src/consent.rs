@@ -155,7 +155,7 @@ impl ConsentEngine {
 
     /// Local user requests a session with a resolvable/paired peer.
     ///
-    /// A resolvable peer is not automatically authorized — availability and an
+    /// A resolvable peer is not automatically authorized - availability and an
     /// explicit accept are still required.
     pub fn request_session(&mut self, peer_id: PeerId) -> Result<(), ConsentError> {
         self.sessions_allowed(&peer_id)?;
