@@ -1,0 +1,30 @@
+[package]
+name = "engytita-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+engytita-ble = { path = "../crates/engytita-ble" }
+engytita-core = { path = "../crates/engytita-core" }
+
+[[bin]]
+name = "ble_decode"
+path = "fuzz_targets/ble_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pairing_read"
+path = "fuzz_targets/pairing_read.rs"
+test = false
+doc = false
+bench = false
+
+# Standalone from the engytita workspace (cargo-fuzz convention).
+[workspace]

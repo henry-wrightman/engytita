@@ -1,0 +1,30 @@
+[package]
+name = "engytita-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "UniFFI bindings for Engytita (opaque handles; no raw key export)"
+readme = "README.md"
+
+[lib]
+name = "engytita_ffi"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
+required-features = ["cli"]
+
+[features]
+default = []
+cli = ["uniffi/cli"]
+
+[dependencies]
+engytita-core = { workspace = true }
+thiserror = { workspace = true }
+uniffi = { workspace = true }
+
+[dev-dependencies]
+hex = { workspace = true }

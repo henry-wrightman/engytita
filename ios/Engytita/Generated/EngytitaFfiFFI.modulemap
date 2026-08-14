@@ -1,0 +1,4 @@
+module EngytitaFfiFFI {
+    header "EngytitaFfiFFI.h"
+    export *
+}

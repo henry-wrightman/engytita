@@ -1,0 +1,9 @@
+# Binding generator config for engytita-ffi
+
+[bindings.kotlin]
+package_name = "org.engytita"
+cdylib_name = "engytita_ffi"
+
+[bindings.swift]
+module_name = "EngytitaFfi"
+cdylib_name = "engytita_ffi"

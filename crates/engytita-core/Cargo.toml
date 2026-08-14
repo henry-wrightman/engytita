@@ -1,0 +1,45 @@
+[package]
+name = "engytita-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Protocol core for mutually-consented, privately-resolvable proximity identity"
+readme = "README.md"
+keywords = ["identity", "proximity", "privacy", "no-std"]
+categories = ["cryptography", "no-std"]
+
+[features]
+default = ["std"]
+# Host / test builds (pairing via snow requires std).
+std = ["alloc", "dep:snow", "dep:rand_core"]
+# Heap-backed Resolver (`std` HashMap).
+alloc = []
+# Embedded resolution table (`heapless::Vec`).
+heapless = ["dep:heapless"]
+
+[dependencies]
+heapless = { workspace = true, optional = true }
+hkdf = { workspace = true }
+hmac = { workspace = true }
+rand_core = { workspace = true, optional = true }
+sha2 = { workspace = true }
+snow = { workspace = true, optional = true }
+subtle = { workspace = true }
+x25519-dalek = { workspace = true }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[[bench]]
+name = "resolver"
+harness = false
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

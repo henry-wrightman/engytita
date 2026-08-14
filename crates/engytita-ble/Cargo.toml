@@ -1,0 +1,17 @@
+[package]
+name = "engytita-ble"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "BLE advertisement encode/decode for Engytita EIDs (bytes only; no radio)"
+readme = "README.md"
+keywords = ["bluetooth", "ble", "advertisement", "privacy"]
+categories = ["encoding", "no-std"]
+
+[dependencies]
+engytita-core = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

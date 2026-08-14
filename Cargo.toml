@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/engytita-core",
+    "crates/engytita-ffi",
+    "crates/engytita-ble",
+]
+exclude = ["fuzz"]
+default-members = [
+    "crates/engytita-core",
+    "crates/engytita-ffi",
+    "crates/engytita-ble",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/engytita/engytita"
+rust-version = "1.75"
+
+[workspace.dependencies]
+engytita-core = { path = "crates/engytita-core", version = "0.1.0" }
+engytita-ble = { path = "crates/engytita-ble", version = "0.1.0" }
+
+# Cryptography (composed; never reimplemented)
+curve25519-dalek = { version = "4", default-features = false }
+x25519-dalek = { version = "2", default-features = false, features = ["static_secrets", "zeroize"] }
+hkdf = { version = "0.12", default-features = false }
+hmac = { version = "0.12", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+subtle = { version = "2", default-features = false }
+zeroize = { version = "1", default-features = false, features = ["zeroize_derive"] }
+
+# Protocol / handshake
+snow = { version = "0.9", default-features = false, features = ["default-resolver", "risky-raw-split"] }
+rand_core = { version = "0.6", default-features = false }
+
+# no_std collections
+heapless = { version = "0.8", default-features = false }
+
+# FFI
+uniffi = { version = "0.28" }
+thiserror = { version = "1" }
+
+# Testing / benches
+criterion = { version = "0.5" }
+proptest = { version = "1" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+hex = { version = "0.4" }

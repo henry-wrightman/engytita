@@ -1,0 +1,54 @@
+{
+  "version": "v1",
+  "description": "Normative known-answer vectors for Engytita v1 key schedule. All octet fields are lowercase hex.",
+  "eid": [
+    {
+      "irk": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "epoch": 1234567,
+      "expected": "c451d591b83ebb31"
+    },
+    {
+      "irk": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "epoch": 0,
+      "expected": "ff7bc96a4febd78c"
+    },
+    {
+      "irk": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "epoch": 1,
+      "expected": "f595822be8192ab0"
+    }
+  ],
+  "peer_id": [
+    {
+      "static_public": "2122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40",
+      "expected": "54d1a24995e911cb93b871665be27ad0"
+    }
+  ],
+  "sts_key": [
+    {
+      "root": "4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60",
+      "nonce": "707172737475767778797a7b7c7d7e7f",
+      "expected": "002cc4ae9332566889f52cc5ec2d31d6"
+    }
+  ],
+  "transport_key": [
+    {
+      "root": "4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60",
+      "nonce": "707172737475767778797a7b7c7d7e7f",
+      "expected": "84e38cc3a63f4ac333abaa62753181f36a0357a8776fb67f2dd0347e4a4df5b5"
+    }
+  ],
+  "sas": [
+    {
+      "handshake_hash": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+      "expected": "040803090804"
+    }
+  ],
+  "pairwise_root": [
+    {
+      "k1": "1111111111111111111111111111111111111111111111111111111111111111",
+      "k2": "2222222222222222222222222222222222222222222222222222222222222222",
+      "expected": "bc263864a2bffe8bcb8905820a885e5d34c5cf070c7ce8bcd01298f90ed09a02"
+    }
+  ]
+}

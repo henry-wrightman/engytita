@@ -1,0 +1,13 @@
+# Compiled by cargo; do not commit artifacts
+/target/
+**/target/
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Generated bindings (checked in when Phase 4 lands; ignore local scratch)
+*.uniffi.tmp
