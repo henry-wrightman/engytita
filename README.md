@@ -59,18 +59,6 @@ cargo build -p engytita-core --no-default-features --target thumbv7em-none-eabi
 Fuzz targets (BLE decode + pairing `read`) live under `fuzz/` - run with
 [`cargo fuzz`](https://github.com/rust-fuzz/cargo-fuzz) after installing it.
 
-## Status
-
-Phases 0–6 are complete for this monorepo:
-
-0. Skeleton and tooling  
-1. Core identity and key schedule  
-2. Pairing and consent  
-3. Spec and vectors  
-4. UniFFI  
-5. BLE bytes  
-6. Platform scaffolding and documentation  
-
 **Out of scope here:** audio/media, live BLE/UWB radios, servers/accounts, and
 buildable mobile apps. See [`android/`](android/) and [`ios/`](ios/) for scaffold
 READMEs only.
