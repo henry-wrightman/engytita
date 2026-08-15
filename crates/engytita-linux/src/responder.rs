@@ -120,8 +120,8 @@ pub async fn run() -> Result<()> {
     let (mut drive, state) = PairingDrive::start_responder(&engine, &eph)?;
     eprintln!("responder ready — waiting for initiator ({state:?})");
 
-    let mut reader_opt = None;
-    let mut writer_opt = None;
+    let mut reader_opt: Option<bluer::gatt::CharacteristicReader> = None;
+    let mut writer_opt: Option<bluer::gatt::CharacteristicWriter> = None;
     let mut read_buf = vec![0u8; 512];
     pin_mut!(write_ctrl);
     pin_mut!(notify_ctrl);

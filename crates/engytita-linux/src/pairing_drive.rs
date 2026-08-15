@@ -6,32 +6,19 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 
 pub struct PairingDrive {
     pub pairing: Pairing,
-    pub as_initiator: bool,
 }
 
 impl PairingDrive {
     pub fn start_initiator(engine: &ConsentEngine, eph: &[u8; 32]) -> Result<(Self, PairingState)> {
         let (pairing, state) = Pairing::initiator(engine.identity(), eph)
             .map_err(|e| anyhow::anyhow!("pairing init: {e:?}"))?;
-        Ok((
-            Self {
-                pairing,
-                as_initiator: true,
-            },
-            state,
-        ))
+        Ok((Self { pairing }, state))
     }
 
     pub fn start_responder(engine: &ConsentEngine, eph: &[u8; 32]) -> Result<(Self, PairingState)> {
         let (pairing, state) = Pairing::responder(engine.identity(), eph)
             .map_err(|e| anyhow::anyhow!("pairing init: {e:?}"))?;
-        Ok((
-            Self {
-                pairing,
-                as_initiator: false,
-            },
-            state,
-        ))
+        Ok((Self { pairing }, state))
     }
 
     pub fn apply_inbound(&mut self, msg: &[u8]) -> PairingState {

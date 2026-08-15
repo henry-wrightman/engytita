@@ -79,7 +79,9 @@ pub async fn run(target: Option<String>, scan_secs: u64) -> Result<()> {
     }
 
     let mut resolver = Resolver::new();
-    resolver.rebuild(&engine.peer_records(), epoch)?;
+    resolver
+        .rebuild(&engine.peer_records(), epoch)
+        .map_err(|e| anyhow::anyhow!("resolver rebuild: {e:?}"))?;
     if let Some(pid) = resolver.resolve(&remote_eid) {
         eprintln!("already known peer {}", hex::encode(pid.as_bytes()));
     } else {
