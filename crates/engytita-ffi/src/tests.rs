@@ -131,6 +131,14 @@ fn ffi_resolve_after_pairing() {
 }
 
 #[test]
+fn ffi_beacon_eid_is_eight_bytes() {
+    let eng = Engytita::new(entropy(10)).unwrap();
+    let eid = eng.beacon_eid(1);
+    assert_eq!(eid.len(), 8);
+    assert_ne!(eid, eng.beacon_eid(2));
+}
+
+#[test]
 fn ffi_availability_off_blocks_session() {
     let alice = Engytita::new(entropy(5)).unwrap();
     let bob = Engytita::new(entropy(6)).unwrap();

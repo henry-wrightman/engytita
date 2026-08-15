@@ -9,5 +9,6 @@
 .idea/
 .vscode/
 
-# Generated bindings (checked in when Phase 4 lands; ignore local scratch)
-*.uniffi.tmp
+# iOS reference demo build products / user state
+ios/Demo/Native/
+**/xcuserdata/

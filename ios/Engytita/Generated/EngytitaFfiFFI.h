@@ -271,6 +271,11 @@ void*_Nonnull uniffi_engytita_ffi_fn_constructor_engytita_new(RustBuffer entropy
 void uniffi_engytita_ffi_fn_method_engytita_accept_session(void*_Nonnull ptr, RustBuffer peer_id, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_ENGYTITA_BEACON_EID
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_ENGYTITA_BEACON_EID
+RustBuffer uniffi_engytita_ffi_fn_method_engytita_beacon_eid(void*_Nonnull ptr, uint64_t epoch, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_ENGYTITA_DECLINE_SESSION
 #define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_ENGYTITA_DECLINE_SESSION
 void uniffi_engytita_ffi_fn_method_engytita_decline_session(void*_Nonnull ptr, RustBuffer peer_id, RustCallStatus *_Nonnull out_status
@@ -359,6 +364,22 @@ RustBuffer uniffi_engytita_ffi_fn_method_pairingsession_reject_sas(void*_Nonnull
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_PAIRINGSESSION_TAKE_INITIAL_EVENT
 #define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_METHOD_PAIRINGSESSION_TAKE_INITIAL_EVENT
 RustBuffer uniffi_engytita_ffi_fn_method_pairingsession_take_initial_event(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_DECODE_BEACON_ADVERTISING_DATA
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_DECODE_BEACON_ADVERTISING_DATA
+RustBuffer uniffi_engytita_ffi_fn_func_decode_beacon_advertising_data(RustBuffer data, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_ENCODE_BEACON_ADVERTISING_DATA
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_ENCODE_BEACON_ADVERTISING_DATA
+RustBuffer uniffi_engytita_ffi_fn_func_encode_beacon_advertising_data(RustBuffer eid, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_EPOCH_SECONDS
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_FN_FUNC_EPOCH_SECONDS
+uint64_t uniffi_engytita_ffi_fn_func_epoch_seconds(RustCallStatus *_Nonnull out_status
+    
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_ENGYTITA_FFI_RUSTBUFFER_ALLOC
@@ -641,9 +662,33 @@ void ffi_engytita_ffi_rust_future_free_void(uint64_t handle
 void ffi_engytita_ffi_rust_future_complete_void(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_DECODE_BEACON_ADVERTISING_DATA
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_DECODE_BEACON_ADVERTISING_DATA
+uint16_t uniffi_engytita_ffi_checksum_func_decode_beacon_advertising_data(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_ENCODE_BEACON_ADVERTISING_DATA
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_ENCODE_BEACON_ADVERTISING_DATA
+uint16_t uniffi_engytita_ffi_checksum_func_encode_beacon_advertising_data(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_EPOCH_SECONDS
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_FUNC_EPOCH_SECONDS
+uint16_t uniffi_engytita_ffi_checksum_func_epoch_seconds(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_METHOD_ENGYTITA_ACCEPT_SESSION
 #define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_METHOD_ENGYTITA_ACCEPT_SESSION
 uint16_t uniffi_engytita_ffi_checksum_method_engytita_accept_session(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_METHOD_ENGYTITA_BEACON_EID
+#define UNIFFI_FFIDEF_UNIFFI_ENGYTITA_FFI_CHECKSUM_METHOD_ENGYTITA_BEACON_EID
+uint16_t uniffi_engytita_ffi_checksum_method_engytita_beacon_eid(void
     
 );
 #endif

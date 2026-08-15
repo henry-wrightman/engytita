@@ -487,6 +487,11 @@ public protocol EngytitaProtocol : AnyObject {
     func acceptSession(peerId: PeerId) throws 
     
     /**
+     * 8-byte beacon EID for `epoch` (for advertise / GATT broadcast).
+     */
+    func beaconEid(epoch: UInt64)  -> Data
+    
+    /**
      * Decline a requested session.
      */
     func declineSession(peerId: PeerId) throws 
@@ -623,6 +628,17 @@ open func acceptSession(peerId: PeerId)throws  {try rustCallWithError(FfiConvert
         FfiConverterTypePeerId.lower(peerId),$0
     )
 }
+}
+    
+    /**
+     * 8-byte beacon EID for `epoch` (for advertise / GATT broadcast).
+     */
+open func beaconEid(epoch: UInt64) -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_engytita_ffi_fn_method_engytita_beacon_eid(self.uniffiClonePointer(),
+        FfiConverterUInt64.lower(epoch),$0
+    )
+})
 }
     
     /**
@@ -1432,6 +1448,30 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionData: FfiConverterRustBuffer {
+    typealias SwiftType = Data?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterData.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterData.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypePeerId: FfiConverterRustBuffer {
     typealias SwiftType = PeerId?
 
@@ -1452,6 +1492,39 @@ fileprivate struct FfiConverterOptionTypePeerId: FfiConverterRustBuffer {
         }
     }
 }
+/**
+ * Extract an Engytita EID from legacy advertising data, if present.
+ */
+public func decodeBeaconAdvertisingData(data: Data)throws  -> Data? {
+    return try  FfiConverterOptionData.lift(try rustCallWithError(FfiConverterTypeEngytitaError.lift) {
+    uniffi_engytita_ffi_fn_func_decode_beacon_advertising_data(
+        FfiConverterData.lower(data),$0
+    )
+})
+}
+/**
+ * Encode an 8-byte EID as Flags + Service Data advertising bytes (15 octets).
+ *
+ * Useful on platforms that can set raw advertising data (e.g. Android).
+ * iOS apps generally cannot emit this layout via CoreBluetooth.
+ */
+public func encodeBeaconAdvertisingData(eid: Data)throws  -> Data {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeEngytitaError.lift) {
+    uniffi_engytita_ffi_fn_func_encode_beacon_advertising_data(
+        FfiConverterData.lower(eid),$0
+    )
+})
+}
+/**
+ * Epoch length in seconds (15 minutes). Hosts SHOULD use
+ * `floor(unix_time / epoch_seconds())` as the beacon epoch.
+ */
+public func epochSeconds() -> UInt64 {
+    return try!  FfiConverterUInt64.lift(try! rustCall() {
+    uniffi_engytita_ffi_fn_func_epoch_seconds($0
+    )
+})
+}
 
 private enum InitializationResult {
     case ok
@@ -1468,7 +1541,19 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
+    if (uniffi_engytita_ffi_checksum_func_decode_beacon_advertising_data() != 19566) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_engytita_ffi_checksum_func_encode_beacon_advertising_data() != 43999) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_engytita_ffi_checksum_func_epoch_seconds() != 18345) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_engytita_ffi_checksum_method_engytita_accept_session() != 7476) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_engytita_ffi_checksum_method_engytita_beacon_eid() != 56710) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_engytita_ffi_checksum_method_engytita_decline_session() != 38358) {
@@ -1483,7 +1568,7 @@ private var initializationResult: InitializationResult = {
     if (uniffi_engytita_ffi_checksum_method_engytita_resolve() != 437) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_engytita_ffi_checksum_method_engytita_revoke() != 33767) {
+    if (uniffi_engytita_ffi_checksum_method_engytita_revoke() != 4132) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_engytita_ffi_checksum_method_engytita_rotate_irk() != 284) {

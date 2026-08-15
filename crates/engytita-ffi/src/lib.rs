@@ -10,12 +10,41 @@
 
 use std::sync::{Arc, Mutex};
 
+use engytita_ble::{decode_advertising_data, encode_advertising_data};
 use engytita_core::{
     Availability, ConsentEngine, ConsentError, Identity, Pairing, PairingError, PairingState,
-    PeerId as CorePeerId, PeerRecord, Resolver, SessionState,
+    PeerId as CorePeerId, PeerRecord, Resolver, SessionState, EPOCH_SECONDS,
 };
 
 uniffi::setup_scaffolding!();
+
+/// Epoch length in seconds (15 minutes). Hosts SHOULD use
+/// `floor(unix_time / epoch_seconds())` as the beacon epoch.
+#[uniffi::export]
+pub fn epoch_seconds() -> u64 {
+    EPOCH_SECONDS
+}
+
+/// Encode an 8-byte EID as Flags + Service Data advertising bytes (15 octets).
+///
+/// Useful on platforms that can set raw advertising data (e.g. Android).
+/// iOS apps generally cannot emit this layout via CoreBluetooth.
+#[uniffi::export]
+pub fn encode_beacon_advertising_data(eid: Vec<u8>) -> Result<Vec<u8>, EngytitaError> {
+    require_len(&eid, 8, "eid")?;
+    let mut arr = [0u8; 8];
+    arr.copy_from_slice(&eid);
+    Ok(encode_advertising_data(&arr).to_vec())
+}
+
+/// Extract an Engytita EID from legacy advertising data, if present.
+#[uniffi::export]
+pub fn decode_beacon_advertising_data(data: Vec<u8>) -> Result<Option<Vec<u8>>, EngytitaError> {
+    match decode_advertising_data(&data) {
+        Ok(eid) => Ok(Some(eid.to_vec())),
+        Err(_) => Ok(None),
+    }
+}
 
 /// Opaque peer handle (16 bytes). Not a public key and not a secret.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
@@ -195,6 +224,12 @@ impl Engytita {
     pub fn peer_id(&self) -> PeerId {
         let eng = self.inner.lock().expect("engine lock");
         eng.identity().peer_id().into()
+    }
+
+    /// 8-byte beacon EID for `epoch` (for advertise / GATT broadcast).
+    pub fn beacon_eid(&self, epoch: u64) -> Vec<u8> {
+        let eng = self.inner.lock().expect("engine lock");
+        eng.identity().beacon_eid(epoch).to_vec()
     }
 
     /// Set availability policy (`Off` or `ContactsOnly`).

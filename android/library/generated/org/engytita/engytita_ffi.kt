@@ -752,6 +752,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -779,6 +787,8 @@ internal interface UniffiLib : Library {
     ): Pointer
     fun uniffi_engytita_ffi_fn_method_engytita_accept_session(`ptr`: Pointer,`peerId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_engytita_ffi_fn_method_engytita_beacon_eid(`ptr`: Pointer,`epoch`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_engytita_ffi_fn_method_engytita_decline_session(`ptr`: Pointer,`peerId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_engytita_ffi_fn_method_engytita_peer_id(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
@@ -815,6 +825,12 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_engytita_ffi_fn_method_pairingsession_take_initial_event(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_engytita_ffi_fn_func_decode_beacon_advertising_data(`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_engytita_ffi_fn_func_encode_beacon_advertising_data(`eid`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_engytita_ffi_fn_func_epoch_seconds(uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun ffi_engytita_ffi_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_engytita_ffi_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -927,7 +943,15 @@ internal interface UniffiLib : Library {
     ): Unit
     fun ffi_engytita_ffi_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_engytita_ffi_checksum_func_decode_beacon_advertising_data(
+    ): Short
+    fun uniffi_engytita_ffi_checksum_func_encode_beacon_advertising_data(
+    ): Short
+    fun uniffi_engytita_ffi_checksum_func_epoch_seconds(
+    ): Short
     fun uniffi_engytita_ffi_checksum_method_engytita_accept_session(
+    ): Short
+    fun uniffi_engytita_ffi_checksum_method_engytita_beacon_eid(
     ): Short
     fun uniffi_engytita_ffi_checksum_method_engytita_decline_session(
     ): Short
@@ -980,7 +1004,19 @@ private fun uniffiCheckContractApiVersion(lib: UniffiLib) {
 
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: UniffiLib) {
+    if (lib.uniffi_engytita_ffi_checksum_func_decode_beacon_advertising_data() != 19566.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_engytita_ffi_checksum_func_encode_beacon_advertising_data() != 43999.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_engytita_ffi_checksum_func_epoch_seconds() != 18345.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_engytita_ffi_checksum_method_engytita_accept_session() != 7476.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_engytita_ffi_checksum_method_engytita_beacon_eid() != 56710.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_engytita_ffi_checksum_method_engytita_decline_session() != 38358.toShort()) {
@@ -995,7 +1031,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_engytita_ffi_checksum_method_engytita_resolve() != 437.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_engytita_ffi_checksum_method_engytita_revoke() != 33767.toShort()) {
+    if (lib.uniffi_engytita_ffi_checksum_method_engytita_revoke() != 4132.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_engytita_ffi_checksum_method_engytita_rotate_irk() != 284.toShort()) {
@@ -1355,6 +1391,11 @@ public interface EngytitaInterface {
     fun `acceptSession`(`peerId`: PeerId)
     
     /**
+     * 8-byte beacon EID for `epoch` (for advertise / GATT broadcast).
+     */
+    fun `beaconEid`(`epoch`: kotlin.ULong): kotlin.ByteArray
+    
+    /**
      * Decline a requested session.
      */
     fun `declineSession`(`peerId`: PeerId)
@@ -1527,6 +1568,21 @@ open class Engytita: Disposable, AutoCloseable, EngytitaInterface {
 }
     }
     
+    
+
+    
+    /**
+     * 8-byte beacon EID for `epoch` (for advertise / GATT broadcast).
+     */override fun `beaconEid`(`epoch`: kotlin.ULong): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_engytita_ffi_fn_method_engytita_beacon_eid(
+        it, FfiConverterULong.lower(`epoch`),_status)
+}
+    }
+    )
+    }
     
 
     
@@ -2464,6 +2520,38 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
 /**
  * @suppress
  */
+public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteArray?> {
+    override fun read(buf: ByteBuffer): kotlin.ByteArray? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterByteArray.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.ByteArray?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterByteArray.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.ByteArray?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterByteArray.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypePeerId: FfiConverterRustBuffer<PeerId?> {
     override fun read(buf: ByteBuffer): PeerId? {
         if (buf.get().toInt() == 0) {
@@ -2489,4 +2577,46 @@ public object FfiConverterOptionalTypePeerId: FfiConverterRustBuffer<PeerId?> {
         }
     }
 }
+        /**
+         * Extract an Engytita EID from legacy advertising data, if present.
+         */
+    @Throws(EngytitaException::class) fun `decodeBeaconAdvertisingData`(`data`: kotlin.ByteArray): kotlin.ByteArray? {
+            return FfiConverterOptionalByteArray.lift(
+    uniffiRustCallWithError(EngytitaException) { _status ->
+    UniffiLib.INSTANCE.uniffi_engytita_ffi_fn_func_decode_beacon_advertising_data(
+        FfiConverterByteArray.lower(`data`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Encode an 8-byte EID as Flags + Service Data advertising bytes (15 octets).
+         *
+         * Useful on platforms that can set raw advertising data (e.g. Android).
+         * iOS apps generally cannot emit this layout via CoreBluetooth.
+         */
+    @Throws(EngytitaException::class) fun `encodeBeaconAdvertisingData`(`eid`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(EngytitaException) { _status ->
+    UniffiLib.INSTANCE.uniffi_engytita_ffi_fn_func_encode_beacon_advertising_data(
+        FfiConverterByteArray.lower(`eid`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Epoch length in seconds (15 minutes). Hosts SHOULD use
+         * `floor(unix_time / epoch_seconds())` as the beacon epoch.
+         */ fun `epochSeconds`(): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_engytita_ffi_fn_func_epoch_seconds(
+        _status)
+}
+    )
+    }
+    
+
 

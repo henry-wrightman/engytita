@@ -552,6 +552,7 @@ dependencies = [
 name = "engytita-ffi"
 version = "0.1.0"
 dependencies = [
+ "engytita-ble",
  "engytita-core",
  "hex",
  "thiserror",
