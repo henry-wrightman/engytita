@@ -4,6 +4,7 @@ members = [
     "crates/engytita-core",
     "crates/engytita-ffi",
     "crates/engytita-ble",
+    "crates/engytita-linux",
 ]
 exclude = ["fuzz"]
 default-members = [

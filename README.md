@@ -46,7 +46,8 @@ attested by Apple's stack, not by Engytita.
 Platform directories:
 
 - Android: [`android/`](android/) — library + demo stubs; UniFFI Kotlin checked in
-- iOS: [`ios/`](ios/) — UniFFI Swift checked in; **reference sample** in [`ios/Demo/`](ios/Demo/)
+- iOS: [`ios/`](ios/) — UniFFI Swift + **reference sample** in [`ios/Demo/`](ios/Demo/)
+- Linux ARM (Pi / robots / vehicles): [`crates/engytita-linux`](crates/engytita-linux) — BlueZ CLI host
 
 ## Development
 
@@ -63,8 +64,17 @@ iOS reference demo (two physical devices; Xcode not run in CI):
 open ios/Demo/EngytitaDemo.xcodeproj
 ```
 
+Linux / Raspberry Pi host:
+
+```bash
+cargo run -p engytita-linux -- status
+# on a BlueZ machine:
+cargo run -p engytita-linux -- responder
+cargo run -p engytita-linux -- initiator
+```
+
 Fuzz targets (BLE decode + pairing `read`) live under `fuzz/` — run with
 [`cargo fuzz`](https://github.com/rust-fuzz/cargo-fuzz) after installing it.
 
 **Out of scope here:** audio/media products, UWB session ownership, servers/accounts.
-Android demo remains a stub; iOS Demo is a host reference sample only.
+Android demo remains a stub.
