@@ -41,7 +41,7 @@ rand_core = { version = "0.6", default-features = false }
 heapless = { version = "0.8", default-features = false }
 
 # FFI
-uniffi = { version = "0.28" }
+uniffi = { version = "0.32" }
 thiserror = { version = "1" }
 
 # Testing / benches
