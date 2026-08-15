@@ -38,7 +38,7 @@ snow = { version = "0.9", default-features = false, features = ["default-resolve
 rand_core = { version = "0.6", default-features = false }
 
 # no_std collections
-heapless = { version = "0.8", default-features = false }
+heapless = { version = "0.9", default-features = false }
 
 # FFI
 uniffi = { version = "0.28" }
