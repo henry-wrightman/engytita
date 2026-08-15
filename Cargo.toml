@@ -35,7 +35,7 @@ zeroize = { version = "1", default-features = false, features = ["zeroize_derive
 
 # Protocol / handshake
 snow = { version = "0.9", default-features = false, features = ["default-resolver", "risky-raw-split"] }
-rand_core = { version = "0.6", default-features = false }
+rand_core = { version = "0.9", default-features = false }
 
 # no_std collections
 heapless = { version = "0.8", default-features = false }
