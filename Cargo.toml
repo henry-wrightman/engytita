@@ -27,7 +27,7 @@ engytita-ble = { path = "crates/engytita-ble", version = "0.1.0" }
 # Cryptography (composed; never reimplemented)
 curve25519-dalek = { version = "4", default-features = false }
 x25519-dalek = { version = "2", default-features = false, features = ["static_secrets", "zeroize"] }
-hkdf = { version = "0.12", default-features = false }
+hkdf = { version = "0.13", default-features = false }
 hmac = { version = "0.12", default-features = false }
 sha2 = { version = "0.10", default-features = false }
 subtle = { version = "2", default-features = false }
