@@ -204,17 +204,13 @@ fn ffi_session_keys_accept_revoke_and_debug() {
         Some("accepted")
     );
 
-    let keys = alice
-        .session_keys(bob_id.clone(), vec![0xab; 16])
-        .unwrap();
+    let keys = alice.session_keys(bob_id.clone(), vec![0xab; 16]).unwrap();
     assert_eq!(keys.sts_key.len(), 16);
     assert_eq!(keys.transport_key.len(), 32);
     let dbg = format!("{keys:?}");
     assert!(dbg.contains("redacted"));
 
-    assert!(alice
-        .session_keys(bob_id.clone(), vec![1, 2, 3])
-        .is_err());
+    assert!(alice.session_keys(bob_id.clone(), vec![1, 2, 3]).is_err());
     assert!(alice
         .request_session(crate::PeerId {
             bytes: vec![0u8; 15]
@@ -238,10 +234,7 @@ fn ffi_pairing_sas_parse_errors_and_reject() {
         .clone()
         .start_pairing_initiator(vec![0xa1; 32])
         .unwrap();
-    let b_sess = bob
-        .clone()
-        .start_pairing_responder(vec![0xb2; 32])
-        .unwrap();
+    let b_sess = bob.clone().start_pairing_responder(vec![0xb2; 32]).unwrap();
 
     let PairingEvent::SendMessage { data: m1 } = a_sess.take_initial_event() else {
         panic!("m1");
@@ -271,10 +264,7 @@ fn ffi_pairing_sas_parse_errors_and_reject() {
         .clone()
         .start_pairing_initiator(vec![0xa3; 32])
         .unwrap();
-    let b2 = bob
-        .clone()
-        .start_pairing_responder(vec![0xb4; 32])
-        .unwrap();
+    let b2 = bob.clone().start_pairing_responder(vec![0xb4; 32]).unwrap();
     let PairingEvent::SendMessage { data: m1 } = a2.take_initial_event() else {
         panic!("m1");
     };
@@ -339,9 +329,7 @@ fn ffi_error_mapping_and_session_state_labels() {
     // Illegal transition: request while already requested.
     assert!(alice.request_session(bob_id.clone()).is_err());
     // NotAccepted: keys before accept.
-    assert!(alice
-        .session_keys(bob_id.clone(), vec![0; 16])
-        .is_err());
+    assert!(alice.session_keys(bob_id.clone(), vec![0; 16]).is_err());
 
     alice.accept_session(bob_id.clone()).unwrap();
     alice.expire_session_for_test(bob_id.clone()).unwrap();

@@ -875,10 +875,7 @@ mod phase2 {
         let PairingState::SendMessage(_) = a.confirm_sas(&da) else {
             panic!("alice irk");
         };
-        assert!(matches!(
-            b.confirm_sas(&db),
-            PairingState::AwaitingMessage
-        ));
+        assert!(matches!(b.confirm_sas(&db), PairingState::AwaitingMessage));
         assert!(matches!(
             b.read(&[0u8; 16]),
             PairingState::Failed(PairingError::Handshake)
@@ -904,9 +901,7 @@ mod phase2 {
         let alice_id = alice_engine.identity().peer_id();
         let eid = alice_engine.identity().beacon_eid(900);
         let mut resolver = Resolver::new();
-        resolver
-            .rebuild(&bob_engine.peer_records(), 900)
-            .unwrap();
+        resolver.rebuild(&bob_engine.peer_records(), 900).unwrap();
         assert_eq!(
             resolver.resolve(&eid),
             Some(alice_id),
