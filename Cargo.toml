@@ -17,8 +17,8 @@ default-members = [
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
-repository = "https://github.com/engytita/engytita"
-rust-version = "1.75"
+repository = "https://github.com/henry-wrightman/engytita"
+rust-version = "1.85"
 
 [workspace.dependencies]
 engytita-core = { path = "crates/engytita-core", version = "0.1.0" }

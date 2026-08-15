@@ -8,6 +8,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -D warnings
+  RUSTDOCFLAGS: -D warnings
 
 jobs:
   fmt:
@@ -31,7 +32,7 @@ jobs:
       - name: Install BlueZ / D-Bus build deps (engytita-linux)
         run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev pkg-config
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
   test:
     name: Test
@@ -42,7 +43,23 @@ jobs:
       - name: Install BlueZ / D-Bus build deps (engytita-linux)
         run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev pkg-config
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace
+      - run: cargo test --workspace --locked
+
+  msrv:
+    name: MSRV (1.85)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.85"
+      - name: Install BlueZ / D-Bus build deps (engytita-linux)
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: msrv-1.85
+      - name: Check workspace on MSRV
+        run: cargo check --workspace --all-targets --locked
 
   no-std:
     name: no_std (thumbv7em-none-eabi)
@@ -59,3 +76,52 @@ jobs:
           -p engytita-core
           --no-default-features
           --target thumbv7em-none-eabi
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install BlueZ / D-Bus build deps (engytita-linux)
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --workspace --no-deps --document-private-items
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+          arguments: --all-features
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: coverage
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
+      - name: Protocol crate coverage (≥95%)
+        run: >
+          cargo tarpaulin
+          -p engytita-core
+          -p engytita-ble
+          -p engytita-ffi
+          --features heapless
+          --engine llvm
+          --timeout 120
+          --fail-under 95
+          --out Xml
+          --output-dir target/coverage

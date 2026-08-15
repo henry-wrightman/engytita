@@ -1,11 +1,21 @@
 # Engytita
 
+[![CI](https://github.com/henry-wrightman/engytita/actions/workflows/ci.yml/badge.svg)](https://github.com/henry-wrightman/engytita/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-APACHE)
+[![MSRV](https://img.shields.io/badge/MSRV-1.85-blue.svg)](Cargo.toml)
+[![security policy](https://img.shields.io/badge/security-policy-green.svg)](SECURITY.md)
+
 Engytita is a protocol and reference library for mutually-consented,
 privately-resolvable identity between physically nearby devices — **TLS for
 physical proximity**. It does not carry application data and does not own a
 radio: it establishes *who* the peer is, proves both sides consented, and
 hands the caller session keys. Ranging, transport, and media are the
 caller's responsibility.
+
+**Status:** `v0.1` reference implementation — suitable for integration and
+interop work, **not** a substitute for a third-party security audit. The core
+is sans-I/O: hosts inject epoch and entropy; Engytita never opens sockets or
+reads an OS clock/RNG.
 
 ## Crates
 
@@ -26,6 +36,10 @@ Normative protocol text and interoperability vectors live in [`spec/`](spec/).
 That directory is intended to become a standalone submodule once a second
 implementer exists. `engytita-core` tests load `spec/vectors/v1.json` as the
 known-answer contract.
+
+## Security
+
+Please report vulnerabilities privately — see [`SECURITY.md`](SECURITY.md).
 
 ## License
 
@@ -60,6 +74,8 @@ Platform directories:
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo build -p engytita-core --no-default-features --target thumbv7em-none-eabi
+cargo deny check
+cargo tarpaulin -p engytita-core -p engytita-ble -p engytita-ffi --features heapless
 ```
 
 ### iOS reference demo
