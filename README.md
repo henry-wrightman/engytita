@@ -11,9 +11,10 @@ caller's responsibility.
 
 | Crate | Role |
 |-------|------|
-| `engytita-core` | `no_std` protocol core — identity, resolution, pairing, consent |
-| `engytita-ffi` | UniFFI bindings (opaque handles; no raw long-term key export) |
-| `engytita-ble` | BLE advertisement encode/decode (bytes only; no radio) |
+| [`engytita-core`](crates/engytita-core) | `no_std` protocol core — identity, resolution, pairing, consent |
+| [`engytita-ffi`](crates/engytita-ffi) | UniFFI bindings (opaque handles; no raw long-term key export) |
+| [`engytita-ble`](crates/engytita-ble) | BLE advertisement encode/decode (bytes only; no radio) |
+| [`engytita-linux`](crates/engytita-linux) | Linux/BlueZ **reference host** (Pi, robots, vehicles) — owns the radio |
 
 Generated Kotlin / Swift bindings (from UniFFI) live in
 `android/library/generated/` and `ios/Engytita/Generated/`. Regenerate with
@@ -32,22 +33,26 @@ Dual-licensed under [Apache-2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT).
 
 ## Platform support
 
-| Capability | Android | iOS |
-|---|---|---|
-| Identity, pairing, consent | Full | Full |
-| Beacon resolution | Full | Full |
-| Ranging keyed by Engytita | Full — `RangingParameters.sessionKeyInfo` accepts the derived STS key | **Not available** — Nearby Interaction manages ranging security internally with its own discovery tokens; there is no seam to inject key material |
-| Background operation | Foreground service; true background is a system-service milestone | Foreground only |
+| Capability | Android | iOS | Linux (BlueZ) |
+|---|---|---|---|
+| Identity, pairing, consent | Full | Full | Full (`engytita-linux`) |
+| Beacon resolution | Full | Full | Full (LE service data + GATT) |
+| Ranging keyed by Engytita | Full — `RangingParameters.sessionKeyInfo` accepts the derived STS key | **Not available** — Nearby Interaction manages ranging security internally; no seam to inject key material | Host's problem (not in this CLI) |
+| Background operation | Foreground service; true background is a system-service milestone | Foreground only | Daemon / systemd (not packaged here) |
 
 **iOS consequence:** ranging is an **untrusted input**. Engytita secures the
 OOB channel and the transport, but distance and bearing measurements are
 attested by Apple's stack, not by Engytita.
 
+**Linux note:** `engytita-linux` can advertise the 8-byte EID in LE **service
+data** (phones generally cannot from an app). GATT UUIDs match the iOS demo
+for eventual phone↔board pairing. See [`crates/engytita-linux/README.md`](crates/engytita-linux/README.md).
+
 Platform directories:
 
 - Android: [`android/`](android/) — library + demo stubs; UniFFI Kotlin checked in
 - iOS: [`ios/`](ios/) — UniFFI Swift + **reference sample** in [`ios/Demo/`](ios/Demo/)
-- Linux ARM (Pi / robots / vehicles): [`crates/engytita-linux`](crates/engytita-linux) — BlueZ CLI host
+- Linux: [`linux/`](linux/) → [`crates/engytita-linux`](crates/engytita-linux)
 
 ## Development
 
@@ -57,20 +62,24 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo build -p engytita-core --no-default-features --target thumbv7em-none-eabi
 ```
 
-iOS reference demo (two physical devices; Xcode not run in CI):
+### iOS reference demo
+
+Two physical devices (Xcode not run in CI):
 
 ```bash
 ./scripts/build-ios.sh
 open ios/Demo/EngytitaDemo.xcodeproj
 ```
 
-Linux / Raspberry Pi host:
+### Linux / Raspberry Pi host
+
+Needs BlueZ + D-Bus (`libdbus-1-dev` / `pkg-config` to build on Linux).
+Prefer building **on the board** (cross-compile needs a sysroot).
 
 ```bash
 cargo run -p engytita-linux -- status
-# on a BlueZ machine:
-cargo run -p engytita-linux -- responder
-cargo run -p engytita-linux -- initiator
+cargo run -p engytita-linux -- responder    # device B
+cargo run -p engytita-linux -- initiator    # device A
 ```
 
 Fuzz targets (BLE decode + pairing `read`) live under `fuzz/` — run with
