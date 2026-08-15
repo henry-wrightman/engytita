@@ -42,7 +42,7 @@ heapless = { version = "0.8", default-features = false }
 
 # FFI
 uniffi = { version = "0.28" }
-thiserror = { version = "1" }
+thiserror = { version = "2" }
 
 # Testing / benches
 criterion = { version = "0.5" }
