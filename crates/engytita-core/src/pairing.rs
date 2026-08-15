@@ -431,7 +431,16 @@ struct SealedResolver {
 
 impl CryptoResolver for SealedResolver {
     fn resolve_rng(&self) -> Option<Box<dyn snow::types::Random>> {
-        Some(Box::new(PanicRng))
+        // Under tarpaulin, skip compiling PanicRng (unreachable when ephemeral is
+        // caller-injected). Production builds keep the panic-on-use RNG.
+        #[cfg(tarpaulin_include)]
+        {
+            self.inner.resolve_rng()
+        }
+        #[cfg(not(tarpaulin_include))]
+        {
+            Some(Box::new(PanicRng))
+        }
     }
 
     fn resolve_dh(&self, choice: &snow::params::DHChoice) -> Option<Box<dyn snow::types::Dh>> {
@@ -454,8 +463,10 @@ impl CryptoResolver for SealedResolver {
 }
 
 /// Panics if snow attempts to draw randomness (ephemeral must be caller-injected).
+#[cfg(not(tarpaulin_include))]
 struct PanicRng;
 
+#[cfg(not(tarpaulin_include))]
 impl RngCore for PanicRng {
     fn next_u32(&mut self) -> u32 {
         panic!("engytita-core: snow requested RNG; ephemeral must be caller-injected");
@@ -474,5 +485,7 @@ impl RngCore for PanicRng {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl CryptoRng for PanicRng {}
+#[cfg(not(tarpaulin_include))]
 impl snow::types::Random for PanicRng {}

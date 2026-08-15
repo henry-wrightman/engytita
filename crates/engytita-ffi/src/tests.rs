@@ -172,3 +172,207 @@ fn ffi_decline_session() {
         Some("declined")
     );
 }
+
+#[test]
+fn ffi_beacon_adv_encode_decode_and_epoch() {
+    assert_eq!(crate::epoch_seconds(), engytita_core::EPOCH_SECONDS);
+
+    let eng = Engytita::new(entropy(11)).unwrap();
+    let eid = eng.beacon_eid(42);
+    let adv = crate::encode_beacon_advertising_data(eid.clone()).unwrap();
+    assert_eq!(
+        crate::decode_beacon_advertising_data(adv).unwrap(),
+        Some(eid)
+    );
+    assert!(crate::encode_beacon_advertising_data(vec![1, 2, 3]).is_err());
+    assert_eq!(
+        crate::decode_beacon_advertising_data(vec![0, 1, 2]).unwrap(),
+        None
+    );
+}
+
+#[test]
+fn ffi_session_keys_accept_revoke_and_debug() {
+    let alice = Engytita::new(entropy(12)).unwrap();
+    let bob = Engytita::new(entropy(13)).unwrap();
+    let (bob_id, _) = drive_pair(alice.clone(), bob);
+
+    alice.request_session(bob_id.clone()).unwrap();
+    alice.accept_session(bob_id.clone()).unwrap();
+    assert_eq!(
+        alice.session_state(bob_id.clone()).unwrap().as_deref(),
+        Some("accepted")
+    );
+
+    let keys = alice
+        .session_keys(bob_id.clone(), vec![0xab; 16])
+        .unwrap();
+    assert_eq!(keys.sts_key.len(), 16);
+    assert_eq!(keys.transport_key.len(), 32);
+    let dbg = format!("{keys:?}");
+    assert!(dbg.contains("redacted"));
+
+    assert!(alice
+        .session_keys(bob_id.clone(), vec![1, 2, 3])
+        .is_err());
+    assert!(alice
+        .request_session(crate::PeerId {
+            bytes: vec![0u8; 15]
+        })
+        .is_err());
+
+    alice.revoke(bob_id.clone()).unwrap();
+    assert_eq!(
+        alice.session_state(bob_id).unwrap().as_deref(),
+        Some("revoked")
+    );
+}
+
+#[test]
+fn ffi_pairing_sas_parse_errors_and_reject() {
+    let alice = Engytita::new(entropy(14)).unwrap();
+    let bob = Engytita::new(entropy(15)).unwrap();
+
+    // Parse errors never touch pairing state.
+    let a_sess = alice
+        .clone()
+        .start_pairing_initiator(vec![0xa1; 32])
+        .unwrap();
+    let b_sess = bob
+        .clone()
+        .start_pairing_responder(vec![0xb2; 32])
+        .unwrap();
+
+    let PairingEvent::SendMessage { data: m1 } = a_sess.take_initial_event() else {
+        panic!("m1");
+    };
+    let _ = b_sess.take_initial_event();
+    let PairingEvent::SendMessage { data: m2 } = b_sess.read(m1) else {
+        panic!("m2");
+    };
+    let PairingEvent::SendMessage { data: m3 } = a_sess.read(m2) else {
+        panic!("m3");
+    };
+    let PairingEvent::ConfirmSas { digits: da } = a_sess.poll() else {
+        panic!("sas");
+    };
+    let _ = b_sess.read(m3);
+
+    assert!(a_sess.confirm_sas("12345".into()).is_err());
+    assert!(a_sess.confirm_sas("12ab56".into()).is_err());
+    let PairingEvent::Failed { message } = a_sess.confirm_sas("000000".into()).unwrap() else {
+        panic!("expected sas mismatch");
+    };
+    assert!(message.contains("mismatch"));
+    let _ = da;
+
+    // Reject on a fresh ConfirmSas session.
+    let a2 = alice
+        .clone()
+        .start_pairing_initiator(vec![0xa3; 32])
+        .unwrap();
+    let b2 = bob
+        .clone()
+        .start_pairing_responder(vec![0xb4; 32])
+        .unwrap();
+    let PairingEvent::SendMessage { data: m1 } = a2.take_initial_event() else {
+        panic!("m1");
+    };
+    let _ = b2.take_initial_event();
+    let PairingEvent::SendMessage { data: m2 } = b2.read(m1) else {
+        panic!("m2");
+    };
+    let PairingEvent::SendMessage { data: m3 } = a2.read(m2) else {
+        panic!("m3");
+    };
+    assert!(matches!(a2.poll(), PairingEvent::ConfirmSas { .. }));
+    let _ = b2.read(m3);
+    assert!(matches!(
+        a2.reject_sas(),
+        PairingEvent::Failed { message } if message.contains("rejected")
+    ));
+}
+
+#[test]
+fn ffi_error_mapping_and_session_state_labels() {
+    use crate::{map_pairing_error, EngytitaError};
+    use engytita_core::{ConsentError, PairingError};
+
+    for (err, needle) in [
+        (ConsentError::UnknownPeer, "unknown"),
+        (ConsentError::Unavailable, "availability"),
+        (ConsentError::NotAllowlisted, "allowlist"),
+        (ConsentError::IllegalTransition, "illegal"),
+        (ConsentError::NotAccepted, "not accepted"),
+    ] {
+        let mapped = EngytitaError::from(err);
+        assert!(mapped.to_string().contains(needle), "{mapped}");
+    }
+
+    for err in [
+        PairingError::Init,
+        PairingError::Handshake,
+        PairingError::InvalidState,
+        PairingError::SasRejected,
+        PairingError::SasMismatch,
+        PairingError::BadRemoteKey,
+    ] {
+        let mapped = map_pairing_error(err);
+        assert!(matches!(mapped, EngytitaError::Pairing { .. }));
+    }
+
+    let alice = Engytita::new(entropy(16)).unwrap();
+    let bob = Engytita::new(entropy(17)).unwrap();
+    let (bob_id, _) = drive_pair(alice.clone(), bob);
+
+    assert_eq!(
+        alice.session_state(bob_id.clone()).unwrap().as_deref(),
+        Some("idle")
+    );
+
+    alice.set_availability(AvailabilityMode::ContactsOnly);
+    alice.request_session(bob_id.clone()).unwrap();
+    assert_eq!(
+        alice.session_state(bob_id.clone()).unwrap().as_deref(),
+        Some("requested")
+    );
+    // Illegal transition: request while already requested.
+    assert!(alice.request_session(bob_id.clone()).is_err());
+    // NotAccepted: keys before accept.
+    assert!(alice
+        .session_keys(bob_id.clone(), vec![0; 16])
+        .is_err());
+
+    alice.accept_session(bob_id.clone()).unwrap();
+    alice.expire_session_for_test(bob_id.clone()).unwrap();
+    assert_eq!(
+        alice.session_state(bob_id).unwrap().as_deref(),
+        Some("expired")
+    );
+}
+
+#[test]
+fn ffi_resolve_rebuild_collision_maps_error() {
+    use engytita_core::{Identity, PeerRecord};
+
+    let eng = Engytita::new(entropy(18)).unwrap();
+    let id_a = Identity::from_entropy64({
+        let mut e = [0x1au8; 64];
+        e[0] = 1;
+        e
+    });
+    let id_b = Identity::from_entropy64({
+        let mut e = [0x1bu8; 64];
+        e[0] = 2;
+        e
+    });
+    let irk = [0x33u8; 32];
+    let root = [0x44u8; 32];
+    eng.insert_peer(PeerRecord::new(id_a.public_key(), irk, root));
+    eng.insert_peer(PeerRecord::new(id_b.public_key(), irk, root));
+    let err = eng.resolve(vec![0u8; 8], 1).unwrap_err();
+    assert!(
+        err.to_string().contains("collision"),
+        "unexpected err: {err}"
+    );
+}

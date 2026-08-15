@@ -1,0 +1,8 @@
+[tool.cargo-tarpaulin]
+# BlueZ CLI host needs hardware/dbus; keep it out of the coverage gate.
+exclude-files = ["crates/engytita-linux/**/*", "**/engytita-linux/**"]
+# Measure HeaplessResolver (optional feature on engytita-core).
+features = "heapless"
+
+# Suggested invocation (protocol crates only):
+#   cargo tarpaulin -p engytita-core -p engytita-ble -p engytita-ffi --features heapless

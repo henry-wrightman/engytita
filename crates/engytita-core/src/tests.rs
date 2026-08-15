@@ -37,6 +37,24 @@ fn protocol_constants() {
     assert_eq!(crate::PROTOCOL_VERSION, "v1");
 }
 
+#[test]
+fn peer_id_as_bytes_round_trip() {
+    let peer = fixture_peer(3, 30, 31);
+    let id = peer.peer_id();
+    assert_eq!(id.as_bytes(), &id.0);
+}
+
+#[test]
+fn rebuild_skips_duplicate_eid_same_peer() {
+    let peer = fixture_peer(6, 60, 61);
+    let mut resolver = Resolver::new();
+    resolver
+        .rebuild(&[peer.clone(), peer.clone()], 7)
+        .expect("same peer twice is not a collision");
+    assert!(!resolver.is_empty());
+    assert_eq!(resolver.len(), 3);
+}
+
 /// Known-answer tests loaded from the normative `spec/vectors/v1.json` contract.
 mod kats {
     use super::*;
@@ -335,16 +353,37 @@ fn rebuild_1000_peers_fast() {
 #[cfg(feature = "heapless")]
 #[test]
 fn heapless_resolver_round_trip() {
-    use crate::HeaplessResolver;
+    use crate::{HeaplessResolver, RebuildError};
 
     let peer = fixture_peer(4, 40, 41);
     let epoch = 42u64;
     let mut resolver = HeaplessResolver::<16>::new();
+    assert!(resolver.is_empty());
     resolver
         .rebuild(std::slice::from_ref(&peer), epoch)
         .expect("capacity");
+    assert_eq!(resolver.len(), 3);
     let beacon = eid(peer.peer_irk(), epoch);
     assert_eq!(resolver.resolve(&beacon), Some(peer.peer_id()));
+
+    let collider = fixture_peer(5, 40, 42); // same IRK seed as peer
+    let mut r2 = HeaplessResolver::<16>::default();
+    assert_eq!(
+        r2.rebuild(&[peer.clone(), collider], epoch),
+        Err(RebuildError::Collision)
+    );
+    assert!(r2.is_empty());
+
+    let mut tiny = HeaplessResolver::<2>::new();
+    assert_eq!(
+        tiny.rebuild(std::slice::from_ref(&peer), epoch),
+        Err(RebuildError::Full)
+    );
+
+    let mut dup = HeaplessResolver::<16>::new();
+    dup.rebuild(&[peer.clone(), peer.clone()], epoch)
+        .expect("duplicate same peer");
+    assert_eq!(dup.len(), 3);
 }
 
 #[test]
@@ -366,7 +405,7 @@ mod phase2 {
     use super::*;
     use crate::{
         Availability, ConsentEngine, ConsentError, Pairing, PairingError, PairingState,
-        SessionState,
+        SessionKeys, SessionState,
     };
 
     fn identity(seed: u8) -> Identity {
@@ -420,6 +459,7 @@ mod phase2 {
         };
         let bob_view_of_alice = b.take_peer_record().expect("bob record");
         let alice_view_of_bob = a.take_peer_record().expect("alice record");
+        assert!(a.take_peer_record().is_none(), "second take is empty");
 
         (alice_view_of_bob, bob_view_of_alice, da)
     }
@@ -697,5 +737,180 @@ mod phase2 {
         );
         engine.set_availability(Availability::Allowlist(vec![peer]));
         engine.request_session(peer).unwrap();
+    }
+
+    #[test]
+    fn expire_session_paths_and_session_keys_debug() {
+        let alice = identity(40);
+        let bob = identity(41);
+        let (rec, _, _) = pair_identities(&alice, &bob, [0x40; 32], [0x41; 32]);
+        let peer = rec.peer_id();
+
+        let mut engine = ConsentEngine::new(alice);
+        assert_eq!(*engine.availability(), Availability::Off);
+        engine.insert_peer(rec);
+        engine.set_availability(Availability::ContactsOnly);
+        assert!(engine.peers().any(|(id, _)| *id == peer));
+        let _ = engine.identity_mut().peer_id();
+
+        engine.request_session(peer).unwrap();
+        engine.expire_session(peer).unwrap();
+        assert_eq!(engine.session_state(&peer), Some(SessionState::Expired));
+        assert_eq!(
+            engine.expire_session(peer),
+            Err(ConsentError::IllegalTransition)
+        );
+
+        engine.request_session(peer).unwrap();
+        engine.accept_session(peer).unwrap();
+        engine.expire_session(peer).unwrap();
+        assert_eq!(engine.session_state(&peer), Some(SessionState::Expired));
+
+        let unknown = identity(42).peer_id();
+        assert_eq!(engine.revoke(unknown), Err(ConsentError::UnknownPeer));
+        assert_eq!(
+            engine.expire_session(unknown),
+            Err(ConsentError::UnknownPeer)
+        );
+
+        engine.set_availability(Availability::Allowlist(vec![peer]));
+        engine.request_session(peer).unwrap();
+        engine.revoke(peer).unwrap();
+        assert!(engine.peer(&peer).is_none());
+        // Allowlist entry for the revoked peer is cleaned up.
+        if let Availability::Allowlist(list) = engine.availability() {
+            assert!(!list.contains(&peer));
+        }
+
+        let keys = SessionKeys {
+            sts_key: [1u8; 16],
+            transport_key: [2u8; 32],
+        };
+        let dbg = format!("{keys:?}");
+        assert!(dbg.contains("redacted"));
+        assert!(!dbg.contains("01, 01"));
+    }
+
+    #[test]
+    fn allowlist_unknown_peer_and_pairing_invalid_ops() {
+        let alice = identity(43);
+        let bob = identity(44);
+        let (rec, _, _) = pair_identities(&alice, &bob, [0x43; 32], [0x44; 32]);
+        let peer = rec.peer_id();
+        let stranger = identity(45).peer_id();
+
+        let mut engine = ConsentEngine::new(alice);
+        engine.insert_peer(rec);
+        engine.set_availability(Availability::Allowlist(vec![peer]));
+        assert_eq!(
+            engine.request_session(stranger),
+            Err(ConsentError::UnknownPeer)
+        );
+
+        let (mut a, _m1) = Pairing::initiator(&identity(46), &[0x46; 32]).unwrap();
+        assert!(matches!(
+            a.poll(),
+            PairingState::Failed(PairingError::InvalidState)
+        ));
+        assert!(matches!(
+            a.read(&[0u8; 8]),
+            PairingState::Failed(PairingError::InvalidState)
+        ));
+
+        let (mut b, _) = Pairing::responder(&identity(47), &[0x47; 32]).unwrap();
+        assert!(matches!(
+            b.confirm_sas(&[0; 6]),
+            PairingState::Failed(PairingError::InvalidState)
+        ));
+        assert!(matches!(
+            b.reject_sas(),
+            PairingState::Failed(PairingError::InvalidState)
+        ));
+    }
+
+    #[test]
+    fn peer_record_debug_and_resolver_empty() {
+        let peer = super::fixture_peer(7, 8, 9);
+        let _ = peer.peer_static_public();
+        let dbg = format!("{peer:?}");
+        assert!(dbg.contains("redacted"));
+        assert!(dbg.contains("peer_id"));
+
+        let mut resolver = Resolver::new();
+        assert!(resolver.is_empty());
+        resolver.rebuild(&[], 1).unwrap();
+        assert!(resolver.is_empty());
+    }
+
+    #[test]
+    fn take_peer_record_before_complete_is_none() {
+        let (mut a, _) = Pairing::initiator(&identity(60), &[0x60; 32]).unwrap();
+        assert!(a.take_peer_record().is_none());
+    }
+
+    #[test]
+    fn irk_garbage_after_sas_fails_handshake() {
+        let alice = identity(61);
+        let bob = identity(62);
+        let (mut a, m1) = Pairing::initiator(&alice, &[0x61; 32]).unwrap();
+        let (mut b, _) = Pairing::responder(&bob, &[0x62; 32]).unwrap();
+
+        let PairingState::SendMessage(m1) = m1 else {
+            panic!("m1");
+        };
+        let PairingState::SendMessage(m2) = b.read(&m1) else {
+            panic!("m2");
+        };
+        let PairingState::SendMessage(m3) = a.read(&m2) else {
+            panic!("m3");
+        };
+        let PairingState::ConfirmSas { digits: da } = a.poll() else {
+            panic!("sas a");
+        };
+        let PairingState::ConfirmSas { digits: db } = b.read(&m3) else {
+            panic!("sas b");
+        };
+        assert_eq!(da, db);
+
+        let PairingState::SendMessage(_) = a.confirm_sas(&da) else {
+            panic!("alice irk");
+        };
+        assert!(matches!(
+            b.confirm_sas(&db),
+            PairingState::AwaitingMessage
+        ));
+        assert!(matches!(
+            b.read(&[0u8; 16]),
+            PairingState::Failed(PairingError::Handshake)
+        ));
+    }
+
+    #[test]
+    fn revoke_asymmetry_revoked_peer_still_resolves_you() {
+        // Alice revokes Bob; Bob still holds Alice's IRK and resolves her beacon.
+        let alice = identity(50);
+        let bob = identity(51);
+        let (alice_view_of_bob, bob_view_of_alice, _) =
+            pair_identities(&alice, &bob, [0x50; 32], [0x51; 32]);
+
+        let mut alice_engine = ConsentEngine::new(alice);
+        alice_engine.insert_peer(alice_view_of_bob);
+        let bob_id = bob.peer_id();
+        alice_engine.set_availability(Availability::ContactsOnly);
+        alice_engine.revoke(bob_id).unwrap();
+
+        let mut bob_engine = ConsentEngine::new(bob);
+        bob_engine.insert_peer(bob_view_of_alice);
+        let alice_id = alice_engine.identity().peer_id();
+        let eid = alice_engine.identity().beacon_eid(900);
+        let mut resolver = Resolver::new();
+        resolver
+            .rebuild(&bob_engine.peer_records(), 900)
+            .unwrap();
+        assert_eq!(
+            resolver.resolve(&eid),
+            Some(alice_id),
+            "revoked peer retains IRK and can still resolve you"
+        );
     }
 }

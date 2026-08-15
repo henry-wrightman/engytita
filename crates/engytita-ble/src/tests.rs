@@ -71,6 +71,17 @@ fn decode_finds_eid_among_other_ad_structures() {
 }
 
 #[test]
+fn decode_skips_non_eid_service_data_then_finds_ours() {
+    let eid = [1u8, 2, 3, 4, 5, 6, 7, 8];
+    let mut buf = Vec::new();
+    // Service Data for a different UUID with a short payload (not 2+8).
+    buf.extend_from_slice(&[4, AD_TYPE_SERVICE_DATA_16, 0x00, 0x18, 0xaa]);
+    buf.extend_from_slice(&encode_service_data_ad(&eid));
+    assert!(buf.len() <= LEGACY_ADV_DATA_MAX);
+    assert_eq!(decode_advertising_data(&buf).unwrap(), eid);
+}
+
+#[test]
 fn malformed_service_data_rejected_without_panic() {
     assert_eq!(decode_service_data_ad(&[]), Err(BleError::Truncated));
     assert_eq!(decode_service_data_ad(&[1, 2, 3]), Err(BleError::Truncated));

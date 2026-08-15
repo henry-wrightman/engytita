@@ -388,6 +388,16 @@ impl Engytita {
     fn insert_peer(&self, record: PeerRecord) {
         self.inner.lock().expect("engine lock").insert_peer(record);
     }
+
+    #[cfg(test)]
+    fn expire_session_for_test(&self, peer_id: PeerId) -> Result<(), EngytitaError> {
+        let id = CorePeerId::try_from(&peer_id)?;
+        self.inner
+            .lock()
+            .expect("engine lock")
+            .expire_session(id)
+            .map_err(Into::into)
+    }
 }
 
 /// In-flight sans-I/O pairing session bound to an [`Engytita`] engine.

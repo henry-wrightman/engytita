@@ -10,6 +10,9 @@ readme = "README.md"
 keywords = ["identity", "proximity", "privacy", "no-std"]
 categories = ["cryptography", "no-std"]
 
+[lints]
+workspace = true
+
 [features]
 default = ["std"]
 # Host / test builds (pairing via snow requires std).
